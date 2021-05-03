@@ -1,0 +1,16 @@
+.bundle
+db/*.sqlite3
+log/*.log
+tmp/**/*
+db/cstore/
+/database/*
+.tmp*
+*.vpp~*
+*~
+Gemfile.lock
+backup/
+.project
+.loadfile
+*.gem
+config/deploy*
+/nbproject/private/
