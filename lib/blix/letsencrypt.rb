@@ -68,6 +68,11 @@ def tidy_challenge_file(file)
   file
 end
 
+def fatal_error(message)
+  STDERR.puts "error: #{message}"
+  exit(false)
+end
+
 # write the challenge file and ensure that intermediate dirs exist
 def write_file(dir, file, content)
   file = tidy_challenge_file(file)
@@ -80,7 +85,7 @@ def write_file(dir, file, content)
       File.write(path, content)
     else
       if File.file?(path)
-        raise "invalid challenge path: #{path}"
+        fatal_error "invalid challenge path: #{path}"
       elsif File.directory?(path)
 
       else
@@ -96,7 +101,7 @@ def backup_file(dir, file)
   orig_file = File.basename(orig_path)
   orig_dir  = File.dirname(orig_path)
 
-  raise "backup file does not exist:#{orig_path}" unless File.exist?(orig_path)
+  fatal_error "backup file does not exist:#{orig_path}" unless File.exist?(orig_path)
 
   seq = 1
   loop  do
@@ -147,14 +152,14 @@ def perform_authorization(challenge_dir, authorization)
   while http_challenge.status == 'pending'
     if Time.now > timeout_time
       remove_file(challenge_dir, challenge_file)
-      raise 'Challenge timeout'
+      fatal_error 'Challenge timeout'
     end
     sleep(2)
     http_challenge.reload
   end
 
   remove_file(challenge_dir, challenge_file)
-  raise 'challenge failed' unless http_challenge.status == 'valid' # => 'valid'
+  fatal_error 'challenge failed' unless http_challenge.status == 'valid' # => 'valid'
 end
 
 # handle options here
@@ -220,11 +225,11 @@ challenge_dir = File.expand_path(options[:challenge_dir] || CHALLENGE_DIR)
 ssl_key_path  = options[:ssl_key] || File.join(ssl_dir, SSL_KEY)
 hook_path     = options[:hook]
 
-raise 'domain name missing'               unless site
-raise 'invalid challenge directory'       unless File.directory?(challenge_dir)
-raise 'invalid ssl certificate directory'       unless File.directory?(ssl_dir)
-raise "ssl private key invalid:#{ssl_key_path}" unless File.file?(ssl_key_path)
-raise "script missing or not executable:#{hook_path}" unless !hook_path || File.executable?(hook_path)
+fatal_error 'domain name missing'               unless site
+fatal_error 'invalid challenge directory'       unless File.directory?(challenge_dir)
+fatal_error 'invalid ssl certificate directory'       unless File.directory?(ssl_dir)
+fatal_error "ssl private key invalid:#{ssl_key_path}" unless File.file?(ssl_key_path)
+fatal_error "script missing or not executable:#{hook_path}" unless !hook_path || File.executable?(hook_path)
 
 certificate_file = File.join(site, SSL_CERT)
 acme_key = File.expand_path(options[:key])
@@ -249,7 +254,7 @@ elsif options[:create]
   private_key = OpenSSL::PKey::RSA.new(4096) # generate
   File.write(acme_key, private_key)
 else
-  raise "acme key file:#{acme_key} not found"
+  fatal_error "acme key file:#{acme_key} not found"
 end
 
 client = if options[:test]
@@ -270,7 +275,7 @@ unless kid
     print('enter your email:')
     gets.strip
   end
-  raise "invalid email:#{email}" unless email && email =~ /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/
+  fatal_error "invalid email:#{email}" unless email && email =~ /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/
 
   account = client.new_account(:contact => "mailto:#{email}", :terms_of_service_agreed => true)
 end
@@ -293,7 +298,7 @@ order.finalize(:csr => csr)
 
 timeout_time = Time.now + TIMEOUT
 while order.status == 'processing'
-  raise 'certificate timeout' if Time.now > timeout_time
+  fatal_error 'certificate timeout' if Time.now > timeout_time
 
   sleep(1)
   order.reload
