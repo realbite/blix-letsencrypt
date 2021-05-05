@@ -2,7 +2,7 @@ Gem::Specification.new do |s|
   s.name = 'blix-letsencrypt'
   s.description = %Q[Command line utilities for letsencrypt]
   s.summary = %Q[Command line utilities for managing  letsencrypt ssl certificates]
-  s.version = '1.0.2'
+  s.version = '1.0.3'
   s.platform = Gem::Platform::RUBY
   s.authors = ['Clive Andrews']
   s.license = 'MIT'

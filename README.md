@@ -13,18 +13,19 @@ gem install blix-letsencrypt
 
 ## command options:
 
-		Usage: letsencrypt [options]
-			-c, --create                     Create ACME private key
-			-k, --key=FILE                   ACME private key file
-			-e, --email=EMAIL                your contact email
-			-d, --domain=DOMAIN              domain name for certificate
-				--challenge_dir=CDIR         challenge file directory
-				--ssl_dir=SSLDIR             ssl certificate file directory
-				--ssl_key=SSLKEY             ssl private key file
-			-t, --test                       enable test mode
-				--force                      force update even if not expired
-			-l, --logfile=LOGFILE            log to file
-			-h, --hook=HOOK                  script to run on renewal
+    Usage: letsencrypt [options]
+
+    -c, --create                     Create ACME private key
+    -k, --key=FILE                   ACME private key file
+    -e, --email=EMAIL                your contact email
+    -d, --domain=DOMAIN              domain name for certificate
+        --challenge_dir=CDIR         challenge file directory
+        --ssl_dir=SSLDIR             ssl certificate file directory
+        --ssl_key=SSLKEY             ssl private key file
+    -t, --test                       enable test mode
+        --force                      force update even if not expired
+    -l, --logfile=LOGFILE            log to file
+    -h, --hook=HOOK                  script to run on renewal
 
 
 ## conventions used
@@ -60,7 +61,7 @@ gem install blix-letsencrypt
 
 * now create your certificate
 
-      letsencrypt --key=/etc/letsencrypt/account/key.pem -d"example.com www.example.com" --challenge_dir="/srv/certbot/.well-known" --ssl_dir="/etc/letsencrypt/ssl" --logfile=/var/log/letsencrypt.log --create
+      letsencrypt --key=/etc/letsencrypt/account/key.pem -d"example.com www.example.com" --challenge_dir="/srv/certbot/.well-known" --ssl_dir="/etc/letsencrypt/ssl" --create
 
 * hopefully your certificate has be created  so update your webserver to use it...
 
@@ -83,16 +84,19 @@ run a script every day to check if the certificates are due for renewal.
 
  eg:
 
-        cat /etc/cron.daily/renew_ssl
 
-    		!/bin/sh
-    		/opt/ruby-2.6.4/bin/letsencrypt --key=/etc/letsencrypt/account/key.pem \
-            -d"example.com www.example.com" \
-            --challenge_dir="/srv/certbot/.well-known" --ssl_dir="/etc/letsencrypt/ssl" \
-            --logfile=/var/log/letsencrypt.log \
-            --hook=/root/bin/reload_nginx
 
-        cat /root/bin/reload_nginx
+    cat /etc/cron.daily/renew_ssl
 
-    		!/bin/sh
-    		/sbin/nginx -t && /sbin/nginx -sreload
+    #!/bin/sh
+    /opt/ruby-2.6.4/bin/letsencrypt --key=/etc/letsencrypt/account/key.pem \
+    -d"example.com www.example.com" \
+    --challenge_dir="/srv/certbot/.well-known" --ssl_dir="/etc/letsencrypt/ssl" \
+    --logfile=/var/log/letsencrypt.log \
+    --hook=/root/bin/reload_nginx
+
+
+    cat /root/bin/reload_nginx
+
+    #!/bin/sh
+    /sbin/nginx -t && /sbin/nginx -sreload

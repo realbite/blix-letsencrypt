@@ -229,7 +229,9 @@ fatal_error 'domain name missing'               unless site
 fatal_error 'invalid challenge directory'       unless File.directory?(challenge_dir)
 fatal_error 'invalid ssl certificate directory'       unless File.directory?(ssl_dir)
 fatal_error "ssl private key invalid:#{ssl_key_path}" unless File.file?(ssl_key_path)
+fatal_error "ACME key missing"                        unless options[:key]
 fatal_error "script missing or not executable:#{hook_path}" unless !hook_path || File.executable?(hook_path)
+
 
 certificate_file = File.join(site, SSL_CERT)
 acme_key = File.expand_path(options[:key])
@@ -299,7 +301,6 @@ order.finalize(:csr => csr)
 timeout_time = Time.now + TIMEOUT
 while order.status == 'processing'
   fatal_error 'certificate timeout' if Time.now > timeout_time
-
   sleep(1)
   order.reload
 end
